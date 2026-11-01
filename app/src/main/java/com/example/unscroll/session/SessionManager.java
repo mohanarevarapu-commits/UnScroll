@@ -21,6 +21,11 @@ public class SessionManager {
     private static final String KEY_BYPASS_PACKAGE = "bypass_package";
     private static final String KEY_BYPASS_EXPIRY = "bypass_expiry";
 
+    // Full Phone Lockdown Mode (15 mins to 5 hours)
+    private static final String KEY_LOCKDOWN_ACTIVE = "lockdown_active";
+    private static final String KEY_LOCKDOWN_START_TIME = "lockdown_start_time";
+    private static final String KEY_LOCKDOWN_DURATION_SECONDS = "lockdown_duration_seconds";
+
     private static volatile SessionManager INSTANCE;
     private final SharedPreferences prefs;
     private final Context context;
@@ -39,6 +44,60 @@ public class SessionManager {
             }
         }
         return INSTANCE;
+    }
+
+    /**
+     * Starts a strict Phone Lockdown from 15 minutes up to 5 hours (300 minutes).
+     */
+    public synchronized void startLockdown(int durationMinutes) {
+        int clampedMinutes = Math.max(15, Math.min(300, durationMinutes));
+        startLockdownSeconds(clampedMinutes * 60);
+    }
+
+    /**
+     * Starts a strict Phone Lockdown for the specified duration in seconds
+     * (supports 15m-5h presets as well as a short demo countdown).
+     */
+    public synchronized void startLockdownSeconds(int durationSeconds) {
+        long startTimeMillis = System.currentTimeMillis();
+        prefs.edit()
+                .putBoolean(KEY_LOCKDOWN_ACTIVE, true)
+                .putLong(KEY_LOCKDOWN_START_TIME, startTimeMillis)
+                .putInt(KEY_LOCKDOWN_DURATION_SECONDS, Math.max(5, durationSeconds))
+                .apply();
+    }
+
+    public synchronized void clearExpiredLockdown() {
+        prefs.edit()
+                .putBoolean(KEY_LOCKDOWN_ACTIVE, false)
+                .apply();
+    }
+
+    public boolean isLockdownActive() {
+        if (!prefs.getBoolean(KEY_LOCKDOWN_ACTIVE, false)) {
+            return false;
+        }
+        long remaining = getLockdownRemainingMillis();
+        if (remaining <= 0L) {
+            clearExpiredLockdown();
+            return false;
+        }
+        return true;
+    }
+
+    public long getLockdownRemainingMillis() {
+        if (!prefs.getBoolean(KEY_LOCKDOWN_ACTIVE, false)) {
+            return 0L;
+        }
+        long startTime = prefs.getLong(KEY_LOCKDOWN_START_TIME, 0L);
+        int durationSeconds = prefs.getInt(KEY_LOCKDOWN_DURATION_SECONDS, 0);
+        long totalDurationMillis = durationSeconds * 1000L;
+        long elapsed = System.currentTimeMillis() - startTime;
+        return Math.max(0L, totalDurationMillis - elapsed);
+    }
+
+    public int getLockdownDurationSeconds() {
+        return prefs.getInt(KEY_LOCKDOWN_DURATION_SECONDS, 15 * 60);
     }
 
     public synchronized void startSession(int durationMinutes, boolean strictMode, String pinCode) {

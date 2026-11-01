@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import com.example.unscroll.session.SessionManager
 import com.example.unscroll.ui.theme.ThermalAuroraTheme
 
 /**
@@ -106,19 +109,42 @@ object CoolingPlanetHost {
             }
         }
     }
+
+    @JvmStatic
+    fun createLockdownOverlayComposeView(
+        activity: Activity,
+        onLockdownCompleted: () -> Unit
+    ): ComposeView {
+        val sessionManager = SessionManager.getInstance(activity)
+        val remainingSeconds = ((sessionManager.lockdownRemainingMillis / 1000L).toInt())
+            .coerceAtLeast(15)
+        return ComposeView(activity).apply {
+            setContent {
+                ThermalAuroraTheme {
+                    ThermalActiveLockdownScreen(
+                        totalDurationSeconds = remainingSeconds,
+                        onLockdownCompleted = onLockdownCompleted
+                    )
+                }
+            }
+        }
+    }
 }
 
 /**
  * Root Composable for the "Thermal Aurora" UnScroll experience:
  * - Full-screen AuroraBackground with 3 drifting blurred blobs reacting to `testHeatLevel`
  * - Floating 68dp glass bottom navigation bar (Home, Heat map, Blocking)
- * - Smooth transitions between tabs, Focus Session screen, and Blocked screen
+ * - Smooth transitions between tabs, Focus Session screen, Phone Lockdown (15m-5h), and Blocked screen
  */
 @Composable
 fun CoolingPlanetApp(
     initialStreakDays: Int = 5,
     onToggleAppBlocked: (String, String, Boolean) -> Unit = { _, _, _ -> }
 ) {
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager.getInstance(context) }
+
     var selectedTab by rememberSaveable { mutableStateOf(CoolingPlanetTab.HOME) }
 
     // State variable to test different heat levels (0.28f = Cool blue light & shade by default)
@@ -126,6 +152,11 @@ fun CoolingPlanetApp(
 
     // Active full-screen overlays
     var isFocusSessionActive by rememberSaveable { mutableStateOf(false) }
+    var isLockdownSetupOpen by rememberSaveable { mutableStateOf(false) }
+    var isLockdownActive by rememberSaveable { mutableStateOf(sessionManager.isLockdownActive) }
+    var lockdownDurationSeconds by rememberSaveable {
+        mutableIntStateOf(sessionManager.lockdownDurationSeconds)
+    }
     var blockedPreviewAppName by rememberSaveable { mutableStateOf<String?>(null) }
 
     // App blocking list state
@@ -142,23 +173,54 @@ fun CoolingPlanetApp(
         )
     }
 
+    val overlayKey = when {
+        isLockdownActive -> "LOCKDOWN_ACTIVE"
+        isLockdownSetupOpen -> "LOCKDOWN_SETUP"
+        blockedPreviewAppName != null -> "BLOCKED_$blockedPreviewAppName"
+        isFocusSessionActive -> "FOCUS_ACTIVE"
+        else -> "TAB_${selectedTab.name}"
+    }
+
     AnimatedContent(
-        targetState = Triple(isFocusSessionActive, blockedPreviewAppName, selectedTab),
+        targetState = overlayKey,
         transitionSpec = {
             (fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) +
                 scaleIn(initialScale = 0.98f, animationSpec = tween(380, easing = FastOutSlowInEasing)))
                 .togetherWith(fadeOut(animationSpec = tween(260)))
         },
         label = "ThermalAuroraScreenTransition"
-    ) { (focusActive, blockedApp, currentTab) ->
+    ) { stateKey ->
         when {
-            blockedApp != null -> {
+            stateKey == "LOCKDOWN_ACTIVE" -> {
+                ThermalActiveLockdownScreen(
+                    totalDurationSeconds = lockdownDurationSeconds,
+                    onLockdownCompleted = {
+                        sessionManager.clearExpiredLockdown()
+                        isLockdownActive = false
+                        testHeatLevel = 0.12f
+                    }
+                )
+            }
+            stateKey == "LOCKDOWN_SETUP" -> {
+                ThermalLockdownSetupScreen(
+                    onStartLockdownSeconds = { durationSecs ->
+                        sessionManager.startLockdownSeconds(durationSecs)
+                        lockdownDurationSeconds = durationSecs
+                        isLockdownSetupOpen = false
+                        isLockdownActive = true
+                    },
+                    onCancel = {
+                        isLockdownSetupOpen = false
+                    }
+                )
+            }
+            stateKey.startsWith("BLOCKED_") -> {
                 ThermalBlockedScreen(
-                    appName = blockedApp,
+                    appName = blockedPreviewAppName ?: "Instagram",
                     onBackToFocus = { blockedPreviewAppName = null }
                 )
             }
-            focusActive -> {
+            stateKey == "FOCUS_ACTIVE" -> {
                 ThermalFocusSessionScreen(
                     startingHeatLevel = testHeatLevel,
                     onSessionFinished = { cooledHeat ->
@@ -171,7 +233,7 @@ fun CoolingPlanetApp(
                 )
             }
             else -> {
-                val backgroundHeat = when (currentTab) {
+                val backgroundHeat = when (selectedTab) {
                     CoolingPlanetTab.HOME -> testHeatLevel
                     CoolingPlanetTab.HEAT_MAP -> (testHeatLevel * 0.65f).coerceIn(0.18f, 0.75f)
                     CoolingPlanetTab.BLOCKING -> 0.16f
@@ -185,13 +247,14 @@ fun CoolingPlanetApp(
                             .navigationBarsPadding()
                     ) {
                         Box(modifier = Modifier.weight(1f)) {
-                            when (currentTab) {
+                            when (selectedTab) {
                                 CoolingPlanetTab.HOME -> {
                                     ThermalHomeScreen(
                                         heatLevel = testHeatLevel,
                                         onHeatLevelChange = { testHeatLevel = it },
                                         streakDays = initialStreakDays.coerceAtLeast(1),
-                                        onStartFocus = { isFocusSessionActive = true }
+                                        onStartFocus = { isFocusSessionActive = true },
+                                        onOpenLockdown = { isLockdownSetupOpen = true }
                                     )
                                 }
                                 CoolingPlanetTab.HEAT_MAP -> {
@@ -214,7 +277,7 @@ fun CoolingPlanetApp(
                         }
 
                         GlassFloatingBottomBar(
-                            selectedTab = currentTab,
+                            selectedTab = selectedTab,
                             onSelectTab = { selectedTab = it }
                         )
                     }

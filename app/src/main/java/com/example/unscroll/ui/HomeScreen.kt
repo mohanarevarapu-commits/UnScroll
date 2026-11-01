@@ -44,7 +44,8 @@ fun ThermalHomeScreen(
     heatLevel: Float,
     onHeatLevelChange: (Float) -> Unit,
     streakDays: Int,
-    onStartFocus: () -> Unit
+    onStartFocus: () -> Unit,
+    onOpenLockdown: () -> Unit = {}
 ) {
     // At 0.82f heatLevel, screen time is 2h 48m (168 mins)
     val totalMinutesToday = (12 + (heatLevel * 190f).roundToInt())
@@ -100,7 +101,7 @@ fun ThermalHomeScreen(
 
         Spacer(modifier = Modifier.height(CoolingPlanetSpacing.xxl))
 
-        // Bottom Section: Two Side-by-Side Glass Cards + Full-Width Green Button + Heat Tester
+        // Bottom Section: Two Side-by-Side Glass Cards + Start Focus + Phone Lockdown + Heat Tester
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -155,6 +156,14 @@ fun ThermalHomeScreen(
             AuroraPrimaryButton(
                 text = "Start focus",
                 onClick = onStartFocus
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            GlassOutlineButton(
+                text = "Phone Lockdown (15m – 5h)",
+                onClick = onOpenLockdown,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(CoolingPlanetSpacing.lg))

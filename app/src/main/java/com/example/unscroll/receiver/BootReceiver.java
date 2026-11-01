@@ -9,13 +9,15 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.example.unscroll.BlockOverlayActivity;
 import com.example.unscroll.session.SessionManager;
 import com.example.unscroll.worker.UsageSyncWorker;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * BroadcastReceiver catching ACTION_BOOT_COMPLETED to resume active focus sessions and schedule WorkManager jobs.
+ * BroadcastReceiver catching ACTION_BOOT_COMPLETED to resume active focus sessions,
+ * active Phone Lockdown sessions, and schedule WorkManager jobs.
  */
 public class BootReceiver extends BroadcastReceiver {
 
@@ -29,9 +31,15 @@ public class BootReceiver extends BroadcastReceiver {
 
         Log.d(TAG, "UnScroll BootReceiver triggered after device reboot.");
 
-        // 1. Resume active focus session status check
+        // 1. Resume active Phone Lockdown or Focus Session post-reboot
         SessionManager sessionManager = SessionManager.getInstance(context);
-        if (sessionManager.isSessionActive()) {
+        if (sessionManager.isLockdownActive()) {
+            Log.d(TAG, "Active Phone Lockdown restored post-reboot. Remaining time: " + sessionManager.getLockdownRemainingMillis() + "ms");
+            Intent lockdownIntent = new Intent(context, BlockOverlayActivity.class);
+            lockdownIntent.putExtra(BlockOverlayActivity.EXTRA_LOCKDOWN_MODE, true);
+            lockdownIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            context.startActivity(lockdownIntent);
+        } else if (sessionManager.isSessionActive()) {
             Log.d(TAG, "Active focus session restored post-reboot. Remaining time: " + sessionManager.getRemainingTimeMillis() + "ms");
         }
 

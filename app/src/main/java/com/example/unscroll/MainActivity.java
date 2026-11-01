@@ -1,5 +1,6 @@
 package com.example.unscroll;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,11 +17,12 @@ import java.util.concurrent.Executors;
 import kotlin.Unit;
 
 /**
- * MainActivity hosting the Jetpack Compose "CoolingPlanet" UI:
- * - Home Screen (Pulsing & glowing Cooling Planet, screen time, streak, Start focus button, heat level tester)
- * - Focus Session Screen (Countdown inside the cooling planet, End session button, gentle completion animation)
+ * MainActivity hosting the Jetpack Compose "Thermal Aurora / Blue Light & Shade" UI:
+ * - Home Screen (Screen time, streak, heat level, Start focus button, Phone Lockdown 15m-5h button)
+ * - Focus Session Screen (Countdown, End session button, gentle completion animation)
+ * - Phone Lockdown Screen (Strict 15 mins to 5 hours phone lockdown with Incoming Calls & Emergency SOS access)
  * - 4-Week Heat Map Screen (28-day rounded grid with tap-to-inspect day total card)
- * - App Blocking Screen (Toggleable app list + calm Blocked screen with cooling planet & Back to focus button)
+ * - App Blocking Screen (Toggleable app list + calm Blocked screen)
  * - Smooth 3-tab Bottom Navigation Bar (Home, Heat Map, Blocking)
  */
 public class MainActivity extends AppCompatActivity {
@@ -29,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         ThemeManager.applyTheme(this);
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+        }
 
         StreakTracker streakTracker = new StreakTracker(this);
         UsageStatsHelper.SocialAppUsageData usageData = UsageStatsHelper.queryTodaySocialUsage(this);

@@ -45,6 +45,20 @@ public class AppBlockerService extends AccessibilityService {
         }
 
         SessionManager sessionManager = SessionManager.getInstance(this);
+
+        // 1. Strict Phone Lockdown Mode (15 mins to 5 hours):
+        // Blocks every foreground app & launcher except Phone Calls, Incoming Call UI, and Emergency SOS
+        if (sessionManager.isLockdownActive()) {
+            if (isAllowedDuringLockdown(packageName)) {
+                return;
+            }
+            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                Log.d(TAG, "Phone Lockdown active! Intercepting package: " + packageName);
+                launchLockdownOverlay();
+            }
+            return;
+        }
+
         boolean sessionActive = sessionManager.isSessionActive();
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -87,6 +101,27 @@ public class AppBlockerService extends AccessibilityService {
     @Override
     public void onInterrupt() {
         Log.w(TAG, "AppBlockerService interrupted.");
+    }
+
+    /**
+     * During Phone Lockdown Mode, only incoming/outgoing Phone Calls, Telecom/In-Call UI,
+     * and Emergency SOS dialers are permitted.
+     */
+    private boolean isAllowedDuringLockdown(String packageName) {
+        if (packageName == null) {
+            return true;
+        }
+        String lower = packageName.toLowerCase();
+        if (lower.contains("incallui")
+                || lower.contains("dialer")
+                || lower.contains("telecom")
+                || lower.contains("emergency")
+                || lower.contains("safetyhub")
+                || lower.equals("com.android.phone")
+                || lower.equals("com.android.systemui")) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isTargetSocialApp(String packageName) {
@@ -144,6 +179,13 @@ public class AppBlockerService extends AccessibilityService {
     private void launchBlockOverlay(String targetPackage) {
         Intent intent = new Intent(this, BlockOverlayActivity.class);
         intent.putExtra(BlockOverlayActivity.EXTRA_TARGET_PACKAGE, targetPackage);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+    }
+
+    private void launchLockdownOverlay() {
+        Intent intent = new Intent(this, BlockOverlayActivity.class);
+        intent.putExtra(BlockOverlayActivity.EXTRA_LOCKDOWN_MODE, true);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
