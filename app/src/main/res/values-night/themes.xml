@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Calm Neutral Dark -->
+    <style name="Theme.UnScroll.CalmNeutral" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/calm_primary</item>
+        <item name="colorPrimaryVariant">@color/calm_primary_dark</item>
+        <item name="colorOnPrimary">#0E1210</item>
+        <item name="colorSecondary">@color/calm_secondary</item>
+        <item name="colorOnSecondary">@color/calm_text_primary</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/card_border</item>
+        <item name="android:statusBarColor">@color/canvas</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/canvas</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.UnScroll.Card</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.UnScroll.Card</item>
+    </style>
+
+    <!-- Emerald Forest Dark -->
+    <style name="Theme.UnScroll.EmeraldForest" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/emerald_primary</item>
+        <item name="colorPrimaryVariant">@color/emerald_primary_dark</item>
+        <item name="colorOnPrimary">#0E1210</item>
+        <item name="colorSecondary">@color/emerald_secondary</item>
+        <item name="colorOnSecondary">@color/emerald_text_primary</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/card_border</item>
+        <item name="android:statusBarColor">@color/canvas</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/canvas</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.UnScroll.Card</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.UnScroll.Card</item>
+    </style>
+
+    <!-- Ocean Deep Dark -->
+    <style name="Theme.UnScroll.OceanDeep" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/ocean_primary</item>
+        <item name="colorPrimaryVariant">@color/ocean_primary_dark</item>
+        <item name="colorOnPrimary">#0E1210</item>
+        <item name="colorSecondary">@color/ocean_secondary</item>
+        <item name="colorOnSecondary">@color/ocean_text_primary</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/card_border</item>
+        <item name="android:statusBarColor">@color/canvas</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/canvas</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.UnScroll.Card</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.UnScroll.Card</item>
+    </style>
+
+    <!-- Sunset Warm Dark -->
+    <style name="Theme.UnScroll.SunsetWarm" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/sunset_primary</item>
+        <item name="colorPrimaryVariant">@color/sunset_primary_dark</item>
+        <item name="colorOnPrimary">#0E1210</item>
+        <item name="colorSecondary">@color/sunset_secondary</item>
+        <item name="colorOnSecondary">@color/sunset_text_primary</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/card_border</item>
+        <item name="android:statusBarColor">@color/canvas</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/canvas</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.UnScroll.Card</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.UnScroll.Card</item>
+    </style>
+
+    <!-- Base Theme pointing to CalmNeutral -->
+    <style name="Theme.UnScroll" parent="Theme.UnScroll.CalmNeutral" />
+
+    <style name="ShapeAppearance.UnScroll.Card" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerSize">20dp</item>
+    </style>
+</resources>

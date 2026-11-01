@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light Background (#F6F3EE) -->
+    <color name="canvas">#F6F3EE</color>
+    <color name="background">#F6F3EE</color>
+    <color name="card_surface">#FFFFFF</color>
+    <color name="card_surface_translucent">#E6FFFFFF</color>
+    <color name="card_border">#E2DDD4</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#EFECE6</color>
+
+    <color name="text_primary">#2B2B2B</color>
+    <color name="text_main">#2B2B2B</color>
+    <color name="text_secondary">#707070</color>
+    <color name="text_tertiary">#909090</color>
+    <color name="divider">#E2DDD4</color>
+
+    <!-- Primary green #7FB69A to #3E8E7E gradient -->
+    <color name="sage_green">#7FB69A</color>
+    <color name="teal_accent">#3E8E7E</color>
+    <color name="primary">#7FB69A</color>
+    <color name="primary_dark">#3E8E7E</color>
+    <color name="primary_light">#E4ECE7</color>
+
+    <color name="secondary">#E8E2D9</color>
+    <color name="secondary_dark">#D1C9BE</color>
+    <color name="secondary_light">#F5F2EC</color>
+
+    <!-- Status & Accents -->
+    <color name="active_green">#7FB69A</color>
+    <color name="active_green_bg">#E4ECE7</color>
+    <color name="inactive_gray">#8C9792</color>
+    <color name="accent_orange">#E5953E</color>
+    <color name="accent_orange_bg">#FAF3E6</color>
+    <color name="warning_red">#D65A53</color>
+    <color name="warning_red_bg">#FBF0EF</color>
+
+    <!-- Dawn Palette Accents (Step 3: Dawn Concept) -->
+    <color name="dawn_canvas">#F6F3EE</color>
+    <color name="dawn_sage">#7FB69A</color>
+    <color name="dawn_teal">#3E8E7E</color>
+    <color name="dawn_lavender">#EAE4F2</color>
+    <color name="dawn_sand">#EDE8E1</color>
+    <color name="dawn_clay">#D9886E</color>
+    <color name="dawn_clay_bg">#FBF2EF</color>
+
+    <!-- Heat-to-Cool Scale (Step 3: Red-orange -> Amber -> Pale Yellow -> Mint -> Cool Blue) -->
+    <color name="heat_hot">#E76F51</color>
+    <color name="heat_hot_bg">#FDF0ED</color>
+    <color name="heat_warm">#F4A261</color>
+    <color name="heat_warm_bg">#FEF6EE</color>
+    <color name="heat_moderate">#E9C46A</color>
+    <color name="heat_moderate_bg">#FDF9EE</color>
+    <color name="heat_cool">#8AB89E</color>
+    <color name="heat_cool_bg">#EFF6F2</color>
+    <color name="heat_restful">#5E81AC</color>
+    <color name="heat_restful_bg">#EFF4FA</color>
+
+    <color name="black">#2B2B2B</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Calm Neutral Palette -->
+    <color name="calm_canvas">#F6F3EE</color>
+    <color name="calm_primary">#7FB69A</color>
+    <color name="calm_primary_dark">#3E8E7E</color>
+    <color name="calm_secondary">#E8E2D9</color>
+    <color name="calm_text_primary">#2B2B2B</color>
+    <color name="calm_text_secondary">#707070</color>
+
+    <!-- Emerald Forest Palette -->
+    <color name="emerald_canvas">#F0FDF4</color>
+    <color name="emerald_primary">#059669</color>
+    <color name="emerald_primary_dark">#047857</color>
+    <color name="emerald_secondary">#D1FAE5</color>
+    <color name="emerald_text_primary">#064E3B</color>
+    <color name="emerald_text_secondary">#047857</color>
+
+    <!-- Ocean Deep Palette -->
+    <color name="ocean_canvas">#EFF6FF</color>
+    <color name="ocean_primary">#2563EB</color>
+    <color name="ocean_primary_dark">#1D4ED8</color>
+    <color name="ocean_secondary">#DBEAFE</color>
+    <color name="ocean_text_primary">#1E3A8A</color>
+    <color name="ocean_text_secondary">#1D4ED8</color>
+
+    <!-- Sunset Warm Palette -->
+    <color name="sunset_canvas">#FFFBEB</color>
+    <color name="sunset_primary">#D97706</color>
+    <color name="sunset_primary_dark">#B45309</color>
+    <color name="sunset_secondary">#FEF3C7</color>
+    <color name="sunset_text_primary">#78350F</color>
+    <color name="sunset_text_secondary">#B45309</color>
+</resources>

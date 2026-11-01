@@ -1,0 +1,122 @@
+<resources>
+    <string name="app_name">UnScroll</string>
+    <string name="app_motto">Scroll less. Live more.</string>
+
+    <!-- Header & Welcome -->
+    <string name="welcome_heading">Welcome to UnScroll</string>
+    <string name="home_subtitle">Take back control of your screen time</string>
+
+    <!-- Permission Banner -->
+    <string name="permission_banner_title">Usage Access Permission Needed</string>
+    <string name="permission_banner_desc">UnScroll requires Usage Access permission to track your social media screen time and maintain daily streak metrics.</string>
+    <string name="btn_grant_permission">Grant Usage Access</string>
+
+    <!-- Streak Tracker Section -->
+    <string name="streak_card_title">Daily Streak Tracker</string>
+    <string name="streak_default_badge">🔥 0 Day Streak!</string>
+    <string name="streak_default_status">Stay under your daily limit to build your streak!</string>
+    <string name="streak_limit_label">Daily Limit Goal: 60 mins</string>
+
+    <!-- Screen Time Metrics Section -->
+    <string name="metrics_card_title">Daily Screen-Time Metrics</string>
+    <string name="metrics_social_badge">Social Apps Today</string>
+    <string name="metric_total_time_label">Total Social Screen Time Today</string>
+    <string name="metric_total_time_default">0 mins</string>
+    <string name="metric_goal_label">Goal: 60m</string>
+
+    <string name="goal_format">Goal: %1$dm</string>
+    <string name="metric_progress_default">0 / 60 mins (0%)</string>
+    <string name="progress_format">%1$d / %2$d mins (%3$d%%)</string>
+
+    <!-- App Breakdown Labels -->
+    <string name="breakdown_title">Social App Breakdown</string>
+    <string name="app_instagram">📷 Instagram</string>
+    <string name="app_snapchat">👻 Snapchat</string>
+    <string name="app_whatsapp">💬 WhatsApp</string>
+    <string name="app_facebook">📘 Facebook</string>
+    <string name="app_youtube">▶️ YouTube</string>
+
+    <!-- Quick Toggle Switch / Controls Section -->
+    <string name="controls_card_title">Quick Controls &amp; Blocking</string>
+    <string name="controls_placeholder_badge">Active</string>
+    <string name="control_app_blocker_label">App Blocker Protection</string>
+    <string name="control_app_blocker_desc">Prevents opening distracting social apps during focus hours</string>
+    <string name="control_snooze_mode_label">Snooze Mode (15 mins)</string>
+    <string name="control_snooze_mode_desc">Temporarily pause restrictions for a brief emergency break</string>
+    <string name="status_blocker_active">App Blocker is ACTIVE</string>
+    <string name="status_blocker_inactive">App Blocker is INACTIVE</string>
+    <string name="status_snooze_active">Snooze Mode ACTIVE</string>
+    <string name="status_snooze_inactive">Snooze Mode INACTIVE</string>
+
+    <!-- Services & App Blocker Strings -->
+    <string name="accessibility_service_description">UnScroll App Blocker monitors when social media apps are opened to help you stay focused.</string>
+    <string name="app_blocker_service_label">UnScroll App Blocker Service</string>
+    <string name="notification_snoozer_service_label">UnScroll Notification Snoozer Service</string>
+
+    <!-- Block Overlay Activity (Step 2 & 3: Positive wording with no shaming) -->
+    <string name="title_block_overlay">%1$s is quiet right now</string>
+    <string name="msg_block_overlay">Resting peacefully. Take a breath and return to what matters.</string>
+    <string name="btn_return_home">Return to Home Screen</string>
+    <string name="btn_return_to_focus">Return to Focus</string>
+    <string name="btn_take_deep_breaths">Take 5 Deep Breaths</string>
+    <string name="breathing_dialog_title">Mindful Breathing Pause</string>
+    <string name="breathing_complete_msg">You\'ve completed 5 mindful breaths. You are in control of your time and focus.</string>
+
+    <!-- System Services Setup Cards -->
+    <string name="card_accessibility_title">Accessibility Service Setup</string>
+    <string name="card_accessibility_desc">App Blocker requires Accessibility Service permission to detect when target social apps are opened and enforce app blocking.</string>
+    <string name="btn_enable_accessibility">Enable Accessibility Service</string>
+    <string name="status_accessibility_active">Accessibility Service ACTIVE</string>
+    <string name="status_accessibility_inactive">Accessibility Service INACTIVE (Tap to Enable)</string>
+
+    <string name="card_notification_title">Notification Listener Setup</string>
+    <string name="card_notification_desc">Notification Snoozer requires Notification Listener permission to snooze or mute incoming social app notifications when Snooze Mode is active.</string>
+    <string name="btn_enable_notification_listener">Enable Notification Access</string>
+    <string name="status_notification_active">Notification Listener ACTIVE</string>
+    <string name="status_notification_inactive">Notification Listener INACTIVE (Tap to Enable)</string>
+
+    <!-- Footer / Status -->
+    <string name="setup_status_title">App Blocker &amp; Notification Snoozer Active</string>
+    <string name="setup_status_desc">AccessibilityService blocking target social apps. NotificationListenerService snoozing notifications in Snooze Mode.</string>
+
+    <!-- App Picker Strings -->
+    <string name="app_icon_desc">App Icon</string>
+    <string name="title_app_picker">Blocked Apps Picker</string>
+    <string name="subtitle_app_picker">Select apps to block during focus sessions</string>
+
+    <!-- Permissions Strings -->
+    <string name="title_permissions">Permission Checklist</string>
+    <string name="subtitle_permissions">Grant permissions to ensure full blocking functionality</string>
+    <string name="perm_usage_access">Usage Access Permission</string>
+    <string name="perm_draw_overlays">Display Over Other Apps</string>
+    <string name="perm_accessibility">Accessibility Service</string>
+    <string name="perm_notification_listener">Notification Listener Access</string>
+    <string name="perm_battery_opt">Battery Optimization Exemption</string>
+
+    <!-- Finish Setup (Home card + Settings row) -->
+    <string name="finish_setup_title">Finish setting up</string>
+    <plurals name="finish_setup_desc">
+        <item quantity="one">%d permission is still off. Tap to turn it on.</item>
+        <item quantity="other">%d permissions are still off. Tap to turn them on.</item>
+    </plurals>
+    <string name="settings_permissions_title">Permissions</string>
+    <string name="settings_permissions_desc">See which permissions are on and turn on any that are missing.</string>
+
+    <!-- Focus Session Strings -->
+    <string name="title_focus_session">Focus Session</string>
+    <string name="btn_start_session">Start Focus Session</string>
+    <string name="btn_end_session">End Session Early</string>
+
+    <!-- Analytics Dashboard -->
+    <string name="title_dashboard">Analytics Dashboard</string>
+
+    <!-- Bottom Nav Titles -->
+    <string name="nav_home">Home</string>
+    <string name="nav_insights">Insights</string>
+    <string name="nav_apps">Apps</string>
+    <string name="nav_analytics">Analytics</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Notification Digest -->
+    <string name="title_notification_digest">Notification Digest</string>
+</resources>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.UnScroll">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.UnScroll"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".OnboardingActivity"
+            android:exported="false"
+            android:label="Onboarding"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".PermissionsSetupActivity"
+            android:exported="false"
+            android:label="Gentle Permission Setup"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".BlockOverlayActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".AppPickerActivity"
+            android:exported="false"
+            android:label="@string/title_app_picker"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".PermissionsActivity"
+            android:exported="false"
+            android:label="@string/title_permissions"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".FocusSessionActivity"
+            android:exported="false"
+            android:label="@string/title_focus_session"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".NotificationDigestActivity"
+            android:exported="false"
+            android:label="@string/title_notification_digest"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false"
+            android:label="@string/title_dashboard"
+            android:theme="@style/Theme.UnScroll" />
+
+        <activity
+            android:name=".AppUsageDetailActivity"
+            android:exported="false"
+            android:label="App Usage Detail"
+            android:theme="@style/Theme.UnScroll" />
+
+        <!-- Accessibility Service for Social App Blocker -->
+        <service
+            android:name=".service.AppBlockerService"
+            android:exported="true"
+            android:label="@string/app_blocker_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <!-- Notification Listener Service for Notification Snoozer -->
+        <service
+            android:name=".service.NotificationSnoozerService"
+            android:exported="true"
+            android:label="@string/notification_snoozer_service_label"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- Boot Receiver -->
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Background (#0E1210) -->
+    <color name="canvas">#0E1210</color>
+    <color name="background">#0E1210</color>
+    <color name="card_surface">#0FFFFFFF</color> <!-- White at 6% opacity -->
+    <color name="card_surface_translucent">#E60FFFFF</color>
+    <color name="card_border">#1AFFFFFF</color>
+    <color name="surface">#0FFFFFFF</color>
+    <color name="surface_variant">#161D1A</color>
+
+    <color name="text_primary">#EBFFFFFF</color> <!-- White at 92% opacity -->
+    <color name="text_main">#EBFFFFFF</color>
+    <color name="text_secondary">#99FFFFFF</color> <!-- White at 60% opacity -->
+    <color name="text_tertiary">#66FFFFFF</color>
+    <color name="divider">#1AFFFFFF</color>
+
+    <!-- Primary green #7FB69A to #3E8E7E gradient -->
+    <color name="sage_green">#7FB69A</color>
+    <color name="teal_accent">#3E8E7E</color>
+    <color name="primary">#7FB69A</color>
+    <color name="primary_dark">#3E8E7E</color>
+    <color name="primary_light">#1D2B24</color>
+
+    <color name="secondary">#2B2B2B</color>
+    <color name="secondary_dark">#3D3933</color>
+    <color name="secondary_light">#2A2722</color>
+
+    <!-- Status & Accents -->
+    <color name="active_green">#7FB69A</color>
+    <color name="active_green_bg">#1D2B24</color>
+    <color name="inactive_gray">#66FFFFFF</color>
+    <color name="accent_orange">#E5953E</color>
+    <color name="accent_orange_bg">#33271C</color>
+    <color name="warning_red">#E2746E</color>
+    <color name="warning_red_bg">#382423</color>
+
+    <color name="black">#EBFFFFFF</color>
+    <color name="white">#0FFFFFFF</color>
+
+    <!-- Calm Neutral Palette -->
+    <color name="calm_canvas">#0E1210</color>
+    <color name="calm_primary">#7FB69A</color>
+    <color name="calm_primary_dark">#3E8E7E</color>
+    <color name="calm_secondary">#2B2B2B</color>
+    <color name="calm_text_primary">#EBFFFFFF</color>
+    <color name="calm_text_secondary">#99FFFFFF</color>
+
+    <!-- Emerald Forest Palette -->
+    <color name="emerald_canvas">#0A1A12</color>
+    <color name="emerald_primary">#059669</color>
+    <color name="emerald_primary_dark">#047857</color>
+    <color name="emerald_secondary">#064E3B</color>
+    <color name="emerald_text_primary">#D1FAE5</color>
+    <color name="emerald_text_secondary">#99FFFFFF</color>
+
+    <!-- Ocean Deep Palette -->
+    <color name="ocean_canvas">#0A1128</color>
+    <color name="ocean_primary">#2563EB</color>
+    <color name="ocean_primary_dark">#1D4ED8</color>
+    <color name="ocean_secondary">#1E3A8A</color>
+    <color name="ocean_text_primary">#DBEAFE</color>
+    <color name="ocean_text_secondary">#99FFFFFF</color>
+
+    <!-- Sunset Warm Palette -->
+    <color name="sunset_canvas">#1C1408</color>
+    <color name="sunset_primary">#D97706</color>
+    <color name="sunset_primary_dark">#B45309</color>
+    <color name="sunset_secondary">#78350F</color>
+    <color name="sunset_text_primary">#FEF3C7</color>
+    <color name="sunset_text_secondary">#99FFFFFF</color>
+</resources>
