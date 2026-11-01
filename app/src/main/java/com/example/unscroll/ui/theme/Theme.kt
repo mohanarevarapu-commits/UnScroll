@@ -1,58 +1,98 @@
 package com.example.unscroll.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+private val CoolingPlanetLightColorScheme = lightColorScheme(
+    primary = CalmGreenPrimary,
     onPrimary = Color.White,
+    primaryContainer = CalmGreenContainer,
+    onPrimaryContainer = OnCalmGreenContainer,
+    secondary = HeatCoolSage,
     onSecondary = Color.White,
+    tertiary = HeatCalmBlueGreen,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = WarmOffWhite,
+    onBackground = InkPrimaryLight,
+    surface = SoftWhiteCard,
+    onSurface = InkPrimaryLight,
+    surfaceVariant = SoftGreySurface,
+    onSurfaceVariant = InkSecondaryLight,
+    outline = OutlineSoftLight
 )
+
+private val CoolingPlanetDarkColorScheme = darkColorScheme(
+    primary = CalmGreenPrimaryDark,
+    onPrimary = Color(0xFF0E241A),
+    primaryContainer = CalmGreenContainerDark,
+    onPrimaryContainer = OnCalmGreenContainerDark,
+    secondary = HeatCoolSage,
+    onSecondary = Color(0xFF10281E),
+    tertiary = HeatCalmBlueGreen,
+    onTertiary = Color(0xFF0C2826),
+    background = NightBackground,
+    onBackground = InkPrimaryDark,
+    surface = NightCardSurface,
+    onSurface = InkPrimaryDark,
+    surfaceVariant = NightGreySurface,
+    onSurfaceVariant = InkSecondaryDark,
+    outline = OutlineSoftDark
+)
+
+/**
+ * 24dp rounded corners across cards, buttons, and containers.
+ */
+val CoolingPlanetShapes = Shapes(
+    extraSmall = RoundedCornerShape(12.dp),
+    small = RoundedCornerShape(16.dp),
+    medium = RoundedCornerShape(24.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp)
+)
+
+/**
+ * Generous spacing tokens for the CoolingPlanet design system.
+ */
+object CoolingPlanetSpacing {
+    val xs = 8.dp
+    val sm = 12.dp
+    val md = 16.dp
+    val lg = 24.dp
+    val xl = 32.dp
+    val xxl = 40.dp
+}
 
 @Composable
-fun UnScrollTheme(
+fun CoolingPlanetTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val colorScheme = if (darkTheme) {
+        CoolingPlanetDarkColorScheme
+    } else {
+        CoolingPlanetLightColorScheme
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = CoolingPlanetTypography,
+        shapes = CoolingPlanetShapes,
         content = content
     )
+}
+
+@Composable
+fun UnScrollTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    CoolingPlanetTheme(darkTheme = darkTheme, content = content)
 }
