@@ -121,8 +121,8 @@ fun CoolingPlanetApp(
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(CoolingPlanetTab.HOME) }
 
-    // State variable to test different heat levels (0.82f = 82% High heat, "2h 48m" by default)
-    var testHeatLevel by rememberSaveable { mutableFloatStateOf(0.82f) }
+    // State variable to test different heat levels (0.28f = Cool blue light & shade by default)
+    var testHeatLevel by rememberSaveable { mutableFloatStateOf(0.28f) }
 
     // Active full-screen overlays
     var isFocusSessionActive by rememberSaveable { mutableStateOf(false) }
