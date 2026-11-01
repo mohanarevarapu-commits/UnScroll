@@ -1,6 +1,6 @@
 # UnScroll Technical Architecture
 
-This document describes the internal architecture, background services, custom Canvas views, and local persistence layer of **UnScroll**.
+This document describes the internal architecture, Jetpack Compose **Thermal Aurora (Blue Light & Shade)** UI layer, **Phone Lockdown Mode (`15 mins` to `5 hours`)**, background system services, and local Room persistence layer of **UnScroll**.
 
 ---
 
@@ -8,35 +8,47 @@ This document describes the internal architecture, background services, custom C
 
 ```mermaid
 flowchart TD
-    UI["MainActivity (Home / Insights / Settings)"]
-    FS["FocusSessionActivity"]
-    ND["NotificationDigestActivity"]
-    BO["BlockOverlayActivity"]
+    MA["MainActivity (Compose Host)"]
+    CPA["CoolingPlanetApp (Root State & Navigation)"]
+    HS["ThermalHomeScreen"]
+    FSS["ThermalFocusSessionScreen"]
+    LSS["ThermalLockdownSetupScreen (15m - 5h)"]
+    LAS["ThermalActiveLockdownScreen (Calls & SOS Only)"]
+    HMS["ThermalHeatMapScreen (4-Week Grid)"]
+    ABS_UI["ThermalAppBlockingScreen & ThermalBlockedScreen"]
+    BOA["BlockOverlayActivity (Lockscreen & Overlay Host)"]
 
-    TM["ThemeManager (Heat-to-Cool Engine)"]
-    SM["SessionManager (Focus & Strict Mode)"]
+    SM["SessionManager (Focus & Lockdown Persistence)"]
     UH["UsageStatsHelper (UsageStatsManager)"]
     ST["StreakTracker (Streaks & Badges)"]
 
     ABS["AppBlockerService (AccessibilityService)"]
     NSS["NotificationSnoozerService (NotificationListenerService)"]
+    BR["BootReceiver (ACTION_BOOT_COMPLETED)"]
     USW["UsageSyncWorker (WorkManager)"]
     DB[("AppDatabase (Room SQLite)")]
 
-    UI --> TM
-    UI --> SM
-    UI --> UH
-    UI --> ST
-    UI --> FS
-    UI --> ND
+    MA --> CPA
+    CPA --> HS
+    CPA --> FSS
+    CPA --> LSS
+    CPA --> LAS
+    CPA --> HMS
+    CPA --> ABS_UI
 
+    LSS --> SM
+    LAS --> SM
     ABS --> SM
     ABS --> DB
-    ABS --> BO
+    ABS --> BOA
+    BOA --> LAS
+    BOA --> ABS_UI
+
+    BR --> SM
+    BR --> BOA
+    BR --> USW
 
     NSS --> DB
-    ND --> DB
-
     USW --> UH
     USW --> ST
     USW --> DB
@@ -44,7 +56,59 @@ flowchart TD
 
 ---
 
-## 2. Local Persistence (`com.example.unscroll.db`)
+## 2. Phone Lockdown Mode Architecture (`15 mins` to `5 hours`)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant LockdownUI as ThermalLockdownSetupScreen
+    participant SessionMgr as SessionManager
+    participant BlockerSvc as AppBlockerService
+    participant OverlayAct as BlockOverlayActivity
+    participant Dialer as System Dialer / Emergency SOS
+
+    User->>LockdownUI: Selects duration (15m to 5h) & taps "Lockdown Phone"
+    LockdownUI->>SessionMgr: startLockdownSeconds(durationSeconds)
+    SessionMgr-->>SessionMgr: Persist start_time & duration_seconds in SharedPreferences
+    LockdownUI->>User: Display ThermalActiveLockdownScreen (BackHandler blocks back button)
+
+    alt User tries to exit to Home Launcher or another app
+        BlockerSvc->>SessionMgr: isLockdownActive() == true
+        BlockerSvc->>BlockerSvc: isPackageAllowedDuringLockdown(pkg) == false
+        BlockerSvc->>OverlayAct: startActivity(EXTRA_LOCKDOWN_MODE = true)
+        OverlayAct->>User: Re-displays ThermalActiveLockdownScreen over lockscreen
+    else Incoming Phone Call or User taps "Emergency SOS" / "Phone Calls"
+        User->>Dialer: ACTION_DIAL / tel:112 / Incoming Call UI
+        BlockerSvc->>BlockerSvc: isPackageAllowedDuringLockdown(pkg) == true (incallui/dialer/telecom/emergency)
+        Dialer->>User: Phone Call or Emergency SOS proceeds normally
+    else Countdown reaches 00:00
+        OverlayAct->>SessionMgr: clearExpiredLockdown()
+        OverlayAct->>User: Shows "Unlock & Return Home" button
+    end
+```
+
+### Key Safeguards in Lockdown Mode
+1. **Duration Clamping (`SessionManager.clampLockdownMinutes`):** Enforces the `15` to `300` minute (`15m` – `5h`) range for standard lockdown sessions while also supporting a `15s Demo` mode for quick testing.
+2. **Call & Emergency Allowlist (`AppBlockerService.isPackageAllowedDuringLockdown`):**
+   - Permits `incallui`, `dialer`, `telecom`, `emergency`, `safetyhub`, `com.android.phone`, and `com.android.systemui`.
+   - Intercepts all other foreground packages (launchers, browsers, social apps, settings) on `TYPE_WINDOW_STATE_CHANGED` and routes back to `BlockOverlayActivity` in Lockdown Mode.
+3. **Lockscreen & Reboot Persistence (`BlockOverlayActivity` & `BootReceiver`):**
+   - `MainActivity` and `BlockOverlayActivity` enable `setShowWhenLocked(true)` and `setTurnScreenOn(true)` on API 27+.
+   - `BootReceiver` checks `sessionManager.isLockdownActive()` on `ACTION_BOOT_COMPLETED` and immediately launches `BlockOverlayActivity` if a lockdown timer is still active.
+
+---
+
+## 3. Jetpack Compose UI Layer ("Thermal Aurora — Blue Light & Shade")
+
+- **[`AuroraBackground.kt`](../app/src/main/java/com/example/unscroll/ui/AuroraBackground.kt):**
+  - Renders a full-screen vertical gradient (`#102A52` → `#091933` → `#040B18`) with three slowly drifting light spheres.
+  - Uses `Modifier.blur(..., edgeTreatment = BlurredEdgeTreatment.Unbounded)` and explicit pixel-radius `Canvas` radial gradients (`radius = size.minDimension / 2f`) so soft glows never clip against rectangular bounds.
+- **[`GlassComponents.kt`](../app/src/main/java/com/example/unscroll/ui/GlassComponents.kt):**
+  - Provides `GlassCard`, `GlassChip`, `AuroraPrimaryButton`, `GlassOutlineButton`, and `GlassFloatingBottomBar` (`68dp` height, `34dp` corner radius, minimum `48dp` touch targets).
+
+---
+
+## 4. Local Persistence (`com.example.unscroll.db`)
 
 UnScroll stores all user preferences, quieted apps, focus sessions, and snoozed notifications locally on the device using **Room (`AppDatabase`)**:
 
@@ -54,42 +118,4 @@ UnScroll stores all user preferences, quieted apps, focus sessions, and snoozed 
 | `DailyUsageEntity` | `DailyUsageDao` | Records daily total screen time, saved time, and thermal state history for insights and heat map visualization. |
 | `FocusSessionEntity` | `SessionDao` | Logs completed and active focus sessions (`startTime`, `durationMinutes`, `completed`). |
 | `BlockedNotificationEntity` | `NotificationDao` | Stores intercepted promotional notifications (`packageName`, `title`, `text`, `timestamp`) for the Quiet Digest. |
-| `ReflectionEntity` | `ReflectionDao` | Saves user reflections entered on `BlockOverlayActivity` when pausing before opening a quieted app. |
-
----
-
-## 3. Background Services & Workers
-
-### `AppBlockerService` (`AccessibilityService`)
-- Listens to `TYPE_WINDOW_STATE_CHANGED` and `TYPE_WINDOW_CONTENT_CHANGED` events.
-- Checks whether the foreground package is marked as quieted in `AppDao` or if an active focus session (`SessionManager`) is running.
-- Detects short-form video surfaces (such as YouTube Shorts reel containers) and launches `BlockOverlayActivity` with a gentle reminder.
-
-### `NotificationSnoozerService` (`NotificationListenerService`)
-- Intercepts incoming status bar notifications in real time.
-- Filters notifications from e-commerce and delivery apps (Flipkart, Myntra, Swiggy, Zomato, Zepto, Blinkit) or user-selected snoozed apps.
-- Cancels the noisy alert and persists the payload into `BlockedNotificationEntity` so the user can review it calmly in `NotificationDigestActivity`.
-
-### `UsageSyncWorker` (`WorkManager`)
-- Runs periodically in the background to aggregate foreground screen time via `UsageStatsHelper`, update `DailyUsageEntity`, and evaluate daily streak continuity via `StreakTracker`.
-
----
-
-## 4. Custom Canvas Views & Design Engine
-
-### `ThemeManager`
-- Computes a normalized usage ratio (`currentUsageMs / dailyLimitMs`).
-- Maps the ratio across the 5-stage **Heat-to-Cool** palette (`#5E81AC` Coolest Blue → `#8AB89E` Mint → `#E9C46A` Pale Yellow → `#F4A261` Amber → `#E76F51` Red-Orange).
-- Always provides a human-readable accessibility status label alongside any color calculation.
-
-### `CircularProgressView`
-- Renders the **Sunrise Progress Ring** on the Home screen.
-- Uses a `12dp` rounded stroke on a warm sand track (`#EDE8E1`) with a dynamic sweep gradient matching the current Heat-to-Cool state.
-- Displays remaining focus time in bold serif typography and sets a dynamic `contentDescription` for TalkBack accessibility.
-
-### `GardenGrowingTreeView`
-- Procedural botanical canvas view with 5 growth stages (`Seed` → `Sprout` → `Sapling` → `Young Tree` → `Full Canopy`).
-- Animates continuously during active focus sessions in `FocusSessionActivity` and renders weekly growth in `InsightsHelper`.
-
-### `HeatMapView`
-- Draws a **7-day × 4-time-of-day** (`Morn`, `Noon`, `Eve`, `Night`) matrix of rounded cells colored by screen-time intensity (`Cool` → `Mid` → `Warm` → `Hot`), complete with an accessible legend.
+| `ReflectionEntity` | `ReflectionDao` | Saves user reflections entered when pausing before opening a quieted app. |

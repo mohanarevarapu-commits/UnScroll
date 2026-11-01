@@ -107,21 +107,22 @@ public class AppBlockerService extends AccessibilityService {
      * During Phone Lockdown Mode, only incoming/outgoing Phone Calls, Telecom/In-Call UI,
      * and Emergency SOS dialers are permitted.
      */
-    private boolean isAllowedDuringLockdown(String packageName) {
+    public static boolean isPackageAllowedDuringLockdown(String packageName) {
         if (packageName == null) {
             return true;
         }
         String lower = packageName.toLowerCase();
-        if (lower.contains("incallui")
+        return lower.contains("incallui")
                 || lower.contains("dialer")
                 || lower.contains("telecom")
                 || lower.contains("emergency")
                 || lower.contains("safetyhub")
                 || lower.equals("com.android.phone")
-                || lower.equals("com.android.systemui")) {
-            return true;
-        }
-        return false;
+                || lower.equals("com.android.systemui");
+    }
+
+    private boolean isAllowedDuringLockdown(String packageName) {
+        return isPackageAllowedDuringLockdown(packageName);
     }
 
     private boolean isTargetSocialApp(String packageName) {

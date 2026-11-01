@@ -47,10 +47,17 @@ public class SessionManager {
     }
 
     /**
+     * Clamps a requested Phone Lockdown duration into the valid [15, 300] minute range (15m to 5h).
+     */
+    public static int clampLockdownMinutes(int durationMinutes) {
+        return Math.max(15, Math.min(300, durationMinutes));
+    }
+
+    /**
      * Starts a strict Phone Lockdown from 15 minutes up to 5 hours (300 minutes).
      */
     public synchronized void startLockdown(int durationMinutes) {
-        int clampedMinutes = Math.max(15, Math.min(300, durationMinutes));
+        int clampedMinutes = clampLockdownMinutes(durationMinutes);
         startLockdownSeconds(clampedMinutes * 60);
     }
 
