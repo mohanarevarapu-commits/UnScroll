@@ -3,6 +3,7 @@ package com.example.unscroll.ui
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -100,29 +101,28 @@ fun GlassChip(
         horizontalArrangement = Arrangement.Center
     ) {
         if (dotColor != null) {
-            Box(
-                modifier = Modifier.size(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                // Soft outer glow around the dot
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    dotColor.copy(alpha = 0.65f),
-                                    Color.Transparent
-                                )
-                            ),
-                            shape = CircleShape
-                        )
+            Canvas(modifier = Modifier.size(18.dp)) {
+                val r = size.minDimension / 2f
+                val c = Offset(size.width / 2f, size.height / 2f)
+                // Smooth radial glow reaching 0 alpha at radius r (no boxy edge)
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            dotColor.copy(alpha = 0.70f),
+                            dotColor.copy(alpha = 0.25f),
+                            Color.Transparent
+                        ),
+                        center = c,
+                        radius = r
+                    ),
+                    radius = r,
+                    center = c
                 )
-                // Solid center dot
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(dotColor, CircleShape)
+                // Crisp solid core dot
+                drawCircle(
+                    color = dotColor,
+                    radius = 4.dp.toPx(),
+                    center = c
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))

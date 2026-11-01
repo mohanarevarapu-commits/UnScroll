@@ -8,22 +8,20 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.unscroll.ui.theme.AuroraBackgroundDark
 import com.example.unscroll.ui.theme.ThermalCalmMint
@@ -31,17 +29,15 @@ import com.example.unscroll.ui.theme.ThermalCoolTeal
 import com.example.unscroll.ui.theme.ThermalHotCrimson
 import com.example.unscroll.ui.theme.ThermalSoftViolet
 import com.example.unscroll.ui.theme.ThermalWarmOrange
-import kotlin.math.roundToInt
 
 /**
  * Reusable full-screen Thermal Aurora background with 3 large soft blurred circles
- * (300dp to 340dp, blur 70dp to 80dp, opacity 0.4 to 0.8) on #0B0E1D.
+ * (300dp to 340dp radius, blur 70dp to 80dp with Unbounded edge treatment so no square clip boxes appear)
+ * on #0B0E1D.
  *
- * - At heatLevel = 1f (Hot): top-left & center-right blobs are magenta-orange (#FF4D6D, #FF8A3D)
- *   with soft violet (#A98BFF) at the bottom.
- * - At heatLevel = 0f (Cool): top-left & center-right blobs are teal-green (#2FC4B2, #4FE3A0)
- *   with soft violet (#A98BFF) at the bottom.
- * - Animates color transitions smoothly with [animateColorAsState] and drifts very slowly.
+ * - At heatLevel = 1f (Hot): blobs are magenta-orange (#FF4D6D, #FF8A3D) with violet (#A98BFF) at the bottom.
+ * - At heatLevel = 0f (Cool): blobs are teal-green (#2FC4B2, #4FE3A0) with violet (#A98BFF) at the bottom.
+ * - Animates color changes smoothly with [animateColorAsState] and drifts very slowly.
  */
 @Composable
 fun AuroraBackground(
@@ -77,12 +73,12 @@ fun AuroraBackground(
         label = "BottomAuroraBlobColor"
     )
 
-    // Slow continuous drift for the 3 aurora blobs
+    // Slow continuous drift for the 3 aurora circles
     val infiniteTransition = rememberInfiniteTransition(label = "AuroraDriftTransition")
 
     val driftX1 by infiniteTransition.animateFloat(
-        initialValue = -28f,
-        targetValue = 32f,
+        initialValue = -32f,
+        targetValue = 36f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 14000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -90,8 +86,8 @@ fun AuroraBackground(
         label = "Blob1DriftX"
     )
     val driftY1 by infiniteTransition.animateFloat(
-        initialValue = -20f,
-        targetValue = 26f,
+        initialValue = -24f,
+        targetValue = 28f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 17000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -100,8 +96,8 @@ fun AuroraBackground(
     )
 
     val driftX2 by infiniteTransition.animateFloat(
-        initialValue = 26f,
-        targetValue = -30f,
+        initialValue = 28f,
+        targetValue = -34f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 16000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -109,8 +105,8 @@ fun AuroraBackground(
         label = "Blob2DriftX"
     )
     val driftY2 by infiniteTransition.animateFloat(
-        initialValue = 18f,
-        targetValue = -24f,
+        initialValue = 20f,
+        targetValue = -26f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 19000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -119,8 +115,8 @@ fun AuroraBackground(
     )
 
     val driftX3 by infiniteTransition.animateFloat(
-        initialValue = -22f,
-        targetValue = 24f,
+        initialValue = -24f,
+        targetValue = 26f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 18000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -128,8 +124,8 @@ fun AuroraBackground(
         label = "Blob3DriftX"
     )
     val driftY3 by infiniteTransition.animateFloat(
-        initialValue = 16f,
-        targetValue = -20f,
+        initialValue = 18f,
+        targetValue = -22f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 15000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -144,77 +140,75 @@ fun AuroraBackground(
             .fillMaxSize()
             .background(AuroraBackgroundDark)
     ) {
-        // Blob 1: Top-left (340dp, blur 80dp, opacity ~0.72)
-        Box(
+        // Full-screen Canvas with Unbounded 75dp blur so the 3 circles never clip into square boxes
+        Canvas(
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset {
-                    IntOffset(
-                        x = ((-48 + driftX1) * density).roundToInt(),
-                        y = ((-36 + driftY1) * density).roundToInt()
-                    )
-                }
-                .size(340.dp)
-                .blur(80.dp)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            topBlobColor.copy(alpha = (0.74f + extraAlpha).coerceAtMost(0.9f)),
-                            topBlobColor.copy(alpha = 0.28f),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = CircleShape
-                )
-        )
+                .fillMaxSize()
+                .blur(radius = 75.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+        ) {
+            val w = size.width
+            val h = size.height
 
-        // Blob 2: Center-right (320dp, blur 75dp, opacity ~0.64)
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .offset {
-                    IntOffset(
-                        x = ((54 + driftX2) * density).roundToInt(),
-                        y = ((-30 + driftY2) * density).roundToInt()
-                    )
-                }
-                .size(320.dp)
-                .blur(75.dp)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            midBlobColor.copy(alpha = (0.66f + extraAlpha).coerceAtMost(0.88f)),
-                            midBlobColor.copy(alpha = 0.24f),
-                            Color.Transparent
-                        )
+            // 1. Top-Left Aurora Circle (~340dp diameter, opacity ~0.72)
+            val center1 = Offset(
+                x = w * 0.22f + driftX1.dp.toPx(),
+                y = h * 0.18f + driftY1.dp.toPx()
+            )
+            val radius1 = 230.dp.toPx()
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        topBlobColor.copy(alpha = (0.72f + extraAlpha).coerceAtMost(0.88f)),
+                        topBlobColor.copy(alpha = 0.34f),
+                        Color.Transparent
                     ),
-                    shape = CircleShape
-                )
-        )
+                    center = center1,
+                    radius = radius1
+                ),
+                radius = radius1,
+                center = center1
+            )
 
-        // Blob 3: Bottom-center Violet (#A98BFF, 310dp, blur 75dp, opacity ~0.48)
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .offset {
-                    IntOffset(
-                        x = ((driftX3) * density).roundToInt(),
-                        y = ((40 + driftY3) * density).roundToInt()
-                    )
-                }
-                .size(310.dp)
-                .blur(75.dp)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            bottomBlobColor.copy(alpha = (0.50f + extraAlpha).coerceAtMost(0.8f)),
-                            bottomBlobColor.copy(alpha = 0.18f),
-                            Color.Transparent
-                        )
+            // 2. Center-Right Aurora Circle (~320dp diameter, opacity ~0.64)
+            val center2 = Offset(
+                x = w * 0.80f + driftX2.dp.toPx(),
+                y = h * 0.44f + driftY2.dp.toPx()
+            )
+            val radius2 = 220.dp.toPx()
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        midBlobColor.copy(alpha = (0.64f + extraAlpha).coerceAtMost(0.85f)),
+                        midBlobColor.copy(alpha = 0.28f),
+                        Color.Transparent
                     ),
-                    shape = CircleShape
-                )
-        )
+                    center = center2,
+                    radius = radius2
+                ),
+                radius = radius2,
+                center = center2
+            )
+
+            // 3. Bottom-Center Violet Aurora Circle (~310dp diameter, opacity ~0.52)
+            val center3 = Offset(
+                x = w * 0.45f + driftX3.dp.toPx(),
+                y = h * 0.82f + driftY3.dp.toPx()
+            )
+            val radius3 = 225.dp.toPx()
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        bottomBlobColor.copy(alpha = (0.54f + extraAlpha).coerceAtMost(0.80f)),
+                        bottomBlobColor.copy(alpha = 0.22f),
+                        Color.Transparent
+                    ),
+                    center = center3,
+                    radius = radius3
+                ),
+                radius = radius3,
+                center = center3
+            )
+        }
 
         // Foreground screen content
         content()

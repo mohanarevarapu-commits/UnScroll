@@ -1,6 +1,7 @@
 package com.example.unscroll.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -168,21 +170,24 @@ fun ThermalHeatMapScreen(todayHeatLevel: Float) {
                                 .clickable { selectedDayIndex = index },
                             contentAlignment = Alignment.Center
                         ) {
-                            // Soft radial glow in the same heat color
-                            Box(
-                                modifier = Modifier
-                                    .size(46.dp)
-                                    .background(
-                                        brush = Brush.radialGradient(
-                                            colors = listOf(
-                                                circleColor.copy(alpha = if (isSelected) 0.72f else 0.48f),
-                                                circleColor.copy(alpha = 0.14f),
-                                                Color.Transparent
-                                            )
+                            // True circular radial glow on Canvas (zero boxy edges)
+                            Canvas(modifier = Modifier.size(48.dp)) {
+                                val r = size.minDimension / 2f
+                                val c = Offset(size.width / 2f, size.height / 2f)
+                                drawCircle(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(
+                                            circleColor.copy(alpha = if (isSelected) 0.72f else 0.48f),
+                                            circleColor.copy(alpha = 0.18f),
+                                            Color.Transparent
                                         ),
-                                        shape = CircleShape
-                                    )
-                            )
+                                        center = c,
+                                        radius = r
+                                    ),
+                                    radius = r,
+                                    center = c
+                                )
+                            }
 
                             // 34dp Glowing Circle (Today has a crisp white ring)
                             Box(
@@ -266,27 +271,26 @@ fun ThermalHeatMapScreen(todayHeatLevel: Float) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier.size(38.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .background(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(
-                                            selectedColor.copy(alpha = 0.65f),
-                                            Color.Transparent
-                                        )
-                                    ),
-                                    shape = CircleShape
-                                )
+                    Canvas(modifier = Modifier.size(38.dp)) {
+                        val r = size.minDimension / 2f
+                        val c = Offset(size.width / 2f, size.height / 2f)
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    selectedColor.copy(alpha = 0.65f),
+                                    selectedColor.copy(alpha = 0.20f),
+                                    Color.Transparent
+                                ),
+                                center = c,
+                                radius = r
+                            ),
+                            radius = r,
+                            center = c
                         )
-                        Box(
-                            modifier = Modifier
-                                .size(22.dp)
-                                .background(selectedColor, CircleShape)
+                        drawCircle(
+                            color = selectedColor,
+                            radius = 10.dp.toPx(),
+                            center = c
                         )
                     }
                     Spacer(modifier = Modifier.width(14.dp))
