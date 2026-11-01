@@ -1,15 +1,19 @@
 package com.example.unscroll.service;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.example.unscroll.BlockOverlayActivity;
 import com.example.unscroll.db.AppDatabase;
+import com.example.unscroll.session.ScreenLockHelper;
 import com.example.unscroll.session.SessionManager;
 import com.example.unscroll.usage.UsageStatsHelper;
 
@@ -17,7 +21,7 @@ import java.util.Objects;
 
 /**
  * AccessibilityService that monitors app usage, focus sessions, Room DB blocked apps,
- * and detects YouTube Shorts feeds to enforce screen time boundaries.
+ * detects YouTube Shorts feeds, and enforces strict hardware Screen Lock during Phone Lockdown Mode.
  */
 public class AppBlockerService extends AccessibilityService {
 
@@ -25,6 +29,65 @@ public class AppBlockerService extends AccessibilityService {
     public static final String PREFS_NAME = "unscroll_prefs";
     public static final String KEY_APP_BLOCKER_ENABLED = "app_blocker_enabled";
     public static final String KEY_SNOOZE_MODE_ENABLED = "snooze_mode_enabled";
+
+    private static volatile AppBlockerService instance;
+
+    private final BroadcastReceiver userPresentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null) {
+                return;
+            }
+            SessionManager sessionManager = SessionManager.getInstance(context);
+            if (sessionManager.isLockdownActive() && !ScreenLockHelper.isPhoneCallActiveOrRinging(context)) {
+                Log.d(TAG, "Device unlocked during active Phone Lockdown — re-engaging Lockdown screen & locking screen.");
+                launchLockdownOverlay();
+                lockScreenViaAccessibility();
+            }
+        }
+    };
+
+    @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+        instance = this;
+        try {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_USER_PRESENT);
+            filter.addAction(Intent.ACTION_SCREEN_ON);
+            registerReceiver(userPresentReceiver, filter);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to register userPresentReceiver", e);
+        }
+        Log.d(TAG, "AppBlockerService connected.");
+    }
+
+    @Override
+    public void onDestroy() {
+        if (instance == this) {
+            instance = null;
+        }
+        try {
+            unregisterReceiver(userPresentReceiver);
+        } catch (Exception ignored) {
+        }
+        super.onDestroy();
+    }
+
+    /**
+     * Immediately locks the physical device screen via AccessibilityService (API 28+).
+     */
+    public static boolean lockScreenViaAccessibility() {
+        AppBlockerService service = instance;
+        if (service != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN);
+        }
+        return false;
+    }
+
+    public static boolean isServiceRunning() {
+        return instance != null;
+    }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -53,8 +116,9 @@ public class AppBlockerService extends AccessibilityService {
                 return;
             }
             if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                Log.d(TAG, "Phone Lockdown active! Intercepting package: " + packageName);
+                Log.d(TAG, "Phone Lockdown active! Intercepting package & locking screen: " + packageName);
                 launchLockdownOverlay();
+                ScreenLockHelper.lockDeviceScreenNow(this);
             }
             return;
         }

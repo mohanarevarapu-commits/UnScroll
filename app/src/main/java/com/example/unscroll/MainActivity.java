@@ -32,11 +32,6 @@ public class MainActivity extends AppCompatActivity {
         ThemeManager.applyTheme(this);
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true);
-            setTurnScreenOn(true);
-        }
-
         StreakTracker streakTracker = new StreakTracker(this);
         UsageStatsHelper.SocialAppUsageData usageData = UsageStatsHelper.queryTodaySocialUsage(this);
         StreakTracker.StreakInfo streakInfo = streakTracker.updateAndGetStreak(usageData.getTotalSocialTimeMillis());

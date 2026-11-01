@@ -1,5 +1,6 @@
 package com.example.unscroll.ui
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -43,6 +44,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,10 +58,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.unscroll.session.ScreenLockHelper
 import com.example.unscroll.session.SessionManager
 import com.example.unscroll.ui.theme.AuroraGreenButton
 import com.example.unscroll.ui.theme.AuroraTextPrimary
@@ -81,13 +87,31 @@ import kotlin.math.roundToInt
  * Setup screen for Phone Lockdown Mode (15 minutes to 5 hours):
  * - Presets: 15m, 30m, 1h, 2h, 3h, 5h (+ 15s Demo for instant testing)
  * - Continuous slider from 15 mins to 300 mins (5 hours)
- * - Clear explanation that device unlock/navigation is blocked while Incoming Calls & Emergency SOS remain accessible
+ * - Immediately locks the device hardware screen when enabled while allowing Incoming Calls & Emergency SOS
  */
 @Composable
 fun ThermalLockdownSetupScreen(
     onStartLockdownSeconds: (Int) -> Unit,
     onCancel: () -> Unit
 ) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var canLockHardware by rememberSaveable {
+        mutableStateOf(ScreenLockHelper.canLockHardwareScreen(context))
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                canLockHardware = ScreenLockHelper.canLockHardwareScreen(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val presetLabels = listOf("15s Demo", "15m", "30m", "1h", "2h", "3h", "5h")
     val presetSeconds = listOf(
         15,
@@ -148,7 +172,7 @@ fun ThermalLockdownSetupScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Lock down your entire phone from 15 mins to 5 hours",
+                    text = "Locks your phone screen from 15 mins to 5 hours",
                     style = MaterialTheme.typography.bodyMedium,
                     color = AuroraTextSecondary,
                     textAlign = TextAlign.Center
@@ -273,8 +297,8 @@ fun ThermalLockdownSetupScreen(
 
                 LockdownFeatureRow(
                     dotColor = ThermalCoolTeal,
-                    title = "No Unlocking Other Apps",
-                    subtitle = "Home launcher, notifications, and all apps stay locked until the timer ends."
+                    title = "Locks Screen Immediately",
+                    subtitle = "Enabling Lockdown turns off & locks your screen until the countdown ends."
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -296,6 +320,29 @@ fun ThermalLockdownSetupScreen(
 
             Spacer(modifier = Modifier.height(22.dp))
 
+            // Hardware Screen Lock Permission Helper (if neither Accessibility nor Device Admin is enabled yet)
+            if (!canLockHardware) {
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp),
+                    onClick = { ScreenLockHelper.requestDeviceAdminPermission(context) }
+                ) {
+                    Text(
+                        text = "HARDWARE SCREEN LOCK PERMISSION",
+                        style = ThermalUppercaseLabelStyle,
+                        color = ThermalCoolTeal
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Tap here to enable Device Admin so UnScroll can physically turn off & lock your screen.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AuroraTextSecondary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
             // Action Buttons
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -303,7 +350,11 @@ fun ThermalLockdownSetupScreen(
             ) {
                 AuroraPrimaryButton(
                     text = "Lockdown Phone ($formattedSelectedDuration)",
-                    onClick = { onStartLockdownSeconds(selectedDurationSeconds) }
+                    onClick = {
+                        onStartLockdownSeconds(selectedDurationSeconds)
+                        // Immediately lock the hardware screen when Lockdown is enabled
+                        ScreenLockHelper.lockDeviceScreenNow(context)
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -391,10 +442,10 @@ private fun LockdownFeatureRow(
 
 /**
  * Active Full-Screen Phone Lockdown Screen:
+ * - Immediately locks the physical device screen and enters full-screen immersive lockdown mode
  * - Intercepts Back button presses so user cannot exit until timer reaches 00:00
  * - Displays remaining time in HH:MM:SS or MM:SS (Manrope Light)
- * - Allows only Emergency SOS call (tel:112) and Phone Dialer
- * - Incoming calls automatically appear on top via AppBlockerService allowlist
+ * - Allows only Emergency SOS call (tel:112), Phone Dialer, and immediate Re-Lock Screen
  */
 @Composable
 fun ThermalActiveLockdownScreen(
@@ -402,6 +453,7 @@ fun ThermalActiveLockdownScreen(
     onLockdownCompleted: () -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val sessionManager = SessionManager.getInstance(context)
 
     var remainingSeconds by rememberSaveable {
@@ -412,7 +464,23 @@ fun ThermalActiveLockdownScreen(
 
     // Block hardware/gesture back press while Lockdown is active
     BackHandler(enabled = !isCompleted) {
-        // Strictly locked until countdown finishes
+        // Re-lock screen if user presses back during active lockdown
+        ScreenLockHelper.lockDeviceScreenNow(context)
+    }
+
+    // Enter full-screen immersive lockdown mode & lock hardware screen when started
+    DisposableEffect(isCompleted) {
+        if (!isCompleted) {
+            ScreenLockHelper.setImmersiveLockdownMode(activity, true)
+            ScreenLockHelper.lockDeviceScreenNow(context)
+        } else {
+            ScreenLockHelper.setImmersiveLockdownMode(activity, false)
+        }
+        onDispose {
+            if (!sessionManager.isLockdownActive) {
+                ScreenLockHelper.setImmersiveLockdownMode(activity, false)
+            }
+        }
     }
 
     LaunchedEffect(isCompleted) {
@@ -467,7 +535,7 @@ fun ThermalActiveLockdownScreen(
             // Top Status Header + Chip
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = if (isCompleted) "PHONE LOCKDOWN · COMPLETE" else "PHONE LOCKDOWN · ACTIVE",
+                    text = if (isCompleted) "PHONE LOCKDOWN · COMPLETE" else "PHONE LOCKDOWN · SCREEN LOCKED",
                     style = ThermalUppercaseLabelStyle,
                     color = AuroraTextSecondary
                 )
@@ -478,7 +546,7 @@ fun ThermalActiveLockdownScreen(
                     label = if (isCompleted) {
                         "Device unlocked · Well done"
                     } else {
-                        "Locked · Incoming calls & SOS only"
+                        "Screen Locked · Incoming calls & SOS only"
                     },
                     dotColor = if (isCompleted) ThermalCalmMint else ThermalCoolTeal
                 )
@@ -492,6 +560,9 @@ fun ThermalActiveLockdownScreen(
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.size(112.dp)
+                        .clickable(enabled = !isCompleted) {
+                            ScreenLockHelper.lockDeviceScreenNow(context)
+                        }
                 ) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         val r = size.minDimension / 2f
@@ -547,7 +618,7 @@ fun ThermalActiveLockdownScreen(
                     text = if (isCompleted) {
                         "Your lockdown session has finished."
                     } else {
-                        "Phone cannot be unlocked until timer reaches 00:00"
+                        "Screen is locked · Tap lock icon to turn screen off immediately"
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = AuroraTextSecondary,
