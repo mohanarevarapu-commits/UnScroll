@@ -1,27 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Minimalist Rising Sun Half-Disc -->
+    <!-- Subtle Glass Circle Container inside Safe Zone -->
     <path
-        android:fillColor="#7FB69A"
-        android:pathData="M34,56 A20,20 0 0,1 74,56 Z" />
+        android:fillColor="#16FFFFFF"
+        android:pathData="M54,22 A32,32 0 1,1 53.99,22 Z"
+        android:strokeWidth="1.2"
+        android:strokeColor="#33FFFFFF" />
 
-    <!-- Primary Horizon Line -->
+    <!-- "U" of US (UnScroll) with upward un-scroll arrow tip -->
     <path
-        android:pathData="M28,62 H80"
-        android:strokeWidth="4.5"
-        android:strokeColor="#3E8E7E"
-        android:strokeLineCap="round" />
+        android:fillColor="#00000000"
+        android:pathData="M30,40 L30,57.5 C30,64.2 34.2,68.5 39.5,68.5 C44.8,68.5 49,64.2 49,57.5 L49,40.5"
+        android:strokeWidth="5.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:endX="49"
+                android:endY="68.5"
+                android:startX="30"
+                android:startY="39"
+                android:type="linear">
+                <item
+                    android:color="#4FE3A0"
+                    android:offset="0.0" />
+                <item
+                    android:color="#2FC4B2"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
 
-    <!-- Secondary Calm Wave -->
+    <!-- Upward Arrow Tip on the right stem of "U" (symbolizing Un-Scroll) -->
     <path
-        android:pathData="M40,71 H68"
-        android:strokeWidth="4.5"
-        android:strokeColor="#7FB69A"
-        android:strokeLineCap="round" />
+        android:fillColor="#00000000"
+        android:pathData="M45.2,43.8 L49,39.2 L52.8,43.8"
+        android:strokeWidth="4.0"
+        android:strokeColor="#4FE3A0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
 
+    <!-- "S" of US (UnScroll) -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M76.5,43.2 C74.6,40.2 71.5,39 67.8,39 C63.2,39 60.2,41.6 60.2,45.5 C60.2,49.6 63.5,51.5 68.8,53.4 C74,55.3 77.5,57.5 77.5,62.2 C77.5,66.4 74,68.5 68.2,68.5 C64,68.5 60.8,67 59.2,64.5"
+        android:strokeWidth="5.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:endX="77.5"
+                android:endY="68.5"
+                android:startX="60"
+                android:startY="39"
+                android:type="linear">
+                <item
+                    android:color="#2FC4B2"
+                    android:offset="0.0" />
+                <item
+                    android:color="#A98BFF"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
 </vector>

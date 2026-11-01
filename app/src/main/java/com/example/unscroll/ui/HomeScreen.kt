@@ -1,5 +1,6 @@
 package com.example.unscroll.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -18,9 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.unscroll.R
 import com.example.unscroll.ui.theme.AuroraTextPrimary
 import com.example.unscroll.ui.theme.AuroraTextSecondary
 import com.example.unscroll.ui.theme.CoolingPlanetSpacing
@@ -32,6 +36,7 @@ import kotlin.math.roundToInt
 
 /**
  * Thermal Aurora Home Screen:
+ * - "US" (UnScroll) brand monogram badge
  * - Small uppercase label "UNSCROLL · TODAY" (2.5sp letter spacing)
  * - Huge light-weight time (~86sp, Manrope Light 300), e.g., "2h 48m"
  * - Glass chip with glowing dot and heat label, e.g., "High heat"
@@ -64,13 +69,21 @@ fun ThermalHomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-        // Top-Center Hero Section: Uppercase Label + 86sp Light Time + Glowing Glass Chip
+        // Top-Center Hero Section: "US" Monogram Logo + Uppercase Label + 86sp Light Time + Glowing Glass Chip
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_unscroll_logo),
+                contentDescription = "US - UnScroll Logo",
+                modifier = Modifier.size(56.dp)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
             Text(
                 text = "UNSCROLL · TODAY",
                 style = ThermalUppercaseLabelStyle,
